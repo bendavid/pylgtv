@@ -4,6 +4,7 @@ import copy
 import json
 import logging
 import os
+import time
 
 import numpy as np
 import websockets
@@ -523,8 +524,9 @@ class WebOsClient:
             except PyLGTVCmdException:
                 pass
 
-        if appId == "com.webos.app.livetv" and self._current_channel is None:
+        if appId == "com.webos.app.livetv":
             try:
+                time.sleep(1)
                 await self.subscribe_current_channel(self.set_current_channel_state)
             except PyLGTVCmdException:
                 pass
