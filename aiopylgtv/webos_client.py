@@ -878,13 +878,16 @@ class WebOsClient:
     async def get_volume(self):
         """Get the current volume."""
         res = await self.request(ep.GET_VOLUME)
-        return res.get("volume")
+        status = res.get("volumeStatus")
+        return status.get("volume") if status else None
 
     async def subscribe_volume(self, callback):
         """Subscribe to changes in the current volume."""
 
         async def volume(payload):
-            await callback(payload.get("volume"))
+            status = payload.get("volumeStatus")
+            volumeLevel = status.get("volume") if status else None
+            await callback(volumeLevel)
 
         return await self.subscribe(volume, ep.GET_VOLUME)
 
