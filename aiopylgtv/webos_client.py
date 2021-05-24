@@ -7,7 +7,6 @@ import logging
 import os
 from datetime import timedelta
 
-import numpy as np
 import websockets
 from sqlitedict import SqliteDict
 
@@ -23,6 +22,12 @@ from .lut_tools import (
     unity_lut_1d,
     unity_lut_3d,
 )
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
 
 logger = logging.getLogger(__name__)
 
@@ -1436,6 +1441,7 @@ class WebOsClient:
         return await self.luna_request(uri, params)
 
     def validateCalibrationData(self, data, shape, dtype):
+        assert np  # numpy needs to be installed for this feature
         if not isinstance(data, np.ndarray):
             raise TypeError(f"data must be of type ndarray but is instead {type(data)}")
         if data.shape != shape:
@@ -1448,6 +1454,7 @@ class WebOsClient:
             )
 
     async def calibration_request(self, command, picMode, data):
+        assert np  # numpy needs to be installed for this feature
         dataenc = base64.b64encode(data.tobytes()).decode()
 
         payload = {
@@ -1465,14 +1472,17 @@ class WebOsClient:
         return await self.request(ep.CALIBRATION, payload)
 
     async def start_calibration(self, picMode, data=DEFAULT_CAL_DATA):
+        assert np  # numpy needs to be installed for this feature
         self.validateCalibrationData(data, (9,), np.float32)
         return await self.calibration_request(cal.CAL_START, picMode, data)
 
     async def end_calibration(self, picMode, data=DEFAULT_CAL_DATA):
+        assert np  # numpy needs to be installed for this feature
         self.validateCalibrationData(data, (9,), np.float32)
         return await self.calibration_request(cal.CAL_END, picMode, data)
 
     async def upload_1d_lut(self, picMode, data=None):
+        assert np  # numpy needs to be installed for this feature
         info = self.calibration_support_info()
         if not info["lut1d"]:
             model = self._system_info["modelName"]
@@ -1485,6 +1495,7 @@ class WebOsClient:
         return await self.calibration_request(cal.UPLOAD_1D_LUT, picMode, data)
 
     async def upload_3d_lut(self, command, picMode, data):
+        assert np  # numpy needs to be installed for this feature
         if command not in [cal.UPLOAD_3D_LUT_BT709, cal.UPLOAD_3D_LUT_BT2020]:
             raise PyLGTVCmdException(f"Invalid 3D LUT Upload command {command}.")
         info = self.calibration_support_info()
@@ -1503,12 +1514,15 @@ class WebOsClient:
         return await self.calibration_request(command, picMode, data)
 
     async def upload_3d_lut_bt709(self, picMode, data=None):
+        assert np  # numpy needs to be installed for this feature
         return await self.upload_3d_lut(cal.UPLOAD_3D_LUT_BT709, picMode, data)
 
     async def upload_3d_lut_bt2020(self, picMode, data=None):
+        assert np  # numpy needs to be installed for this feature
         return await self.upload_3d_lut(cal.UPLOAD_3D_LUT_BT2020, picMode, data)
 
     async def set_ui_data(self, command, picMode, value):
+        assert np  # numpy needs to be installed for this feature
         if not (value >= 0 and value <= 100):
             raise ValueError
 
@@ -1516,44 +1530,53 @@ class WebOsClient:
         return await self.calibration_request(command, picMode, data)
 
     async def set_brightness(self, picMode, value):
+        assert np  # numpy needs to be installed for this feature
         return await self.set_ui_data(cal.BRIGHTNESS_UI_DATA, picMode, value)
 
     async def set_contrast(self, picMode, value):
+        assert np  # numpy needs to be installed for this feature
         return await self.set_ui_data(cal.CONTRAST_UI_DATA, picMode, value)
 
     async def set_oled_light(self, picMode, value):
+        assert np  # numpy needs to be installed for this feature
         return await self.set_ui_data(cal.BACKLIGHT_UI_DATA, picMode, value)
 
     async def set_color(self, picMode, value):
+        assert np  # numpy needs to be installed for this feature
         return await self.set_ui_data(cal.COLOR_UI_DATA, picMode, value)
 
     async def set_1d_2_2_en(self, picMode, value=0):
+        assert np  # numpy needs to be installed for this feature
         data = np.array(value, dtype=np.uint16)
         return await self.calibration_request(
             cal.ENABLE_GAMMA_2_2_TRANSFORM, picMode, data
         )
 
     async def set_1d_0_45_en(self, picMode, value=0):
+        assert np  # numpy needs to be installed for this feature
         data = np.array(value, dtype=np.uint16)
         return await self.calibration_request(
             cal.ENABLE_GAMMA_0_45_TRANSFORM, picMode, data
         )
 
-    async def set_bt709_3by3_gamut_data(
-        self, picMode, data=np.identity(3, dtype=np.float32)
-    ):
+    async def set_bt709_3by3_gamut_data(self, picMode, data=None):
+        assert np  # numpy needs to be installed for this feature
+        if data is None:
+            data = np.identity(3, dtype=np.float32)
         self.validateCalibrationData(data, (3, 3), np.float32)
         return await self.calibration_request(cal.BT709_3BY3_GAMUT_DATA, picMode, data)
 
-    async def set_bt2020_3by3_gamut_data(
-        self, picMode, data=np.identity(3, dtype=np.float32)
-    ):
+    async def set_bt2020_3by3_gamut_data(self, picMode, data=None):
+        assert np  # numpy needs to be installed for this feature
+        if data is None:
+            data = np.identity(3, dtype=np.float32)
         self.validateCalibrationData(data, (3, 3), np.float32)
         return await self.calibration_request(cal.BT2020_3BY3_GAMUT_DATA, picMode, data)
 
     async def set_dolby_vision_config_data(
         self, white_level=700.0, black_level=0.0, gamma=2.2, primaries=BT2020_PRIMARIES
     ):
+        assert np  # numpy needs to be installed for this feature
 
         info = self.calibration_support_info()
         dv_config_type = info["dv_config_type"]
@@ -1591,6 +1614,7 @@ class WebOsClient:
         mastering_peak_3=10000,
         rolloff_point_3=50,
     ):
+        assert np  # numpy needs to be installed for this feature
 
         data = np.array(
             [
@@ -1608,6 +1632,7 @@ class WebOsClient:
         return await self.calibration_request(cal.SET_TONEMAP_PARAM, picMode, data)
 
     async def ddc_reset(self, picMode, reset_1d_lut=True):
+        assert np  # numpy needs to be installed for this feature
         if not isinstance(reset_1d_lut, bool):
             raise TypeError(
                 f"reset_1d_lut should be a bool, instead got {reset_1d_lut} of type {type(reset_1d_lut)}."
@@ -1641,6 +1666,7 @@ class WebOsClient:
         return await self.subscribe(settings, ep.GET_SYSTEM_SETTINGS, payload=payload)
 
     async def upload_1d_lut_from_file(self, picMode, filename):
+        assert np  # numpy needs to be installed for this feature
         ext = filename.split(".")[-1].lower()
         if ext == "cal":
             lut = await asyncio.get_running_loop().run_in_executor(
@@ -1658,6 +1684,7 @@ class WebOsClient:
         return await self.upload_1d_lut(picMode, lut)
 
     async def upload_3d_lut_from_file(self, command, picMode, filename):
+        assert np  # numpy needs to be installed for this feature
         ext = filename.split(".")[-1].lower()
         if ext == "cube":
             lut = await asyncio.get_running_loop().run_in_executor(
@@ -1671,11 +1698,13 @@ class WebOsClient:
         return await self.upload_3d_lut(command, picMode, lut)
 
     async def upload_3d_lut_bt709_from_file(self, picMode, filename):
+        assert np  # numpy needs to be installed for this feature
         return await self.upload_3d_lut_from_file(
             cal.UPLOAD_3D_LUT_BT709, picMode, filename
         )
 
     async def upload_3d_lut_bt2020_from_file(self, picMode, filename):
+        assert np  # numpy needs to be installed for this feature
         return await self.upload_3d_lut_from_file(
             cal.UPLOAD_3D_LUT_BT2020, picMode, filename
         )

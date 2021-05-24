@@ -6,7 +6,8 @@ with open("README.md") as f:
 setup(
     name="aiopylgtv",
     packages=["aiopylgtv"],
-    install_requires=["websockets>=8.1", "numpy>=1.17.0", "sqlitedict"],
+    install_requires=["websockets>=8.1", "sqlitedict"],
+    extras_require={"calibration": ["numpy>=1.17.0"]},
     python_requires=">=3.7",
     zip_safe=True,
     version="0.4.1",
