@@ -1436,19 +1436,16 @@ class WebOsClient:
         return await self.luna_request(uri, params)
 
     async def set_pc_mode(self, pc_mode=True, hdmi_input="hdmi2"):
-        """Set PC mode for an HDMI input"""
+        """Set PC mode for an HDMI input."""
+
         inputs = ["hdmi1", "hdmi2", "hdmi3", "hdmi4"]
 
         if hdmi_input not in inputs:
             return
 
-        # Compose hdmiPcMode = {"hdmi1" : False, "hdmi2": True, "hdmi3" : False, "hdmi4" : False}
-        hdmiPcMode = {}
-        for i in inputs:
-            hdmiPcMode[i] = True if (pc_mode == True and i == hdmi_input) else False
-        
         uri = "com.webos.settingsservice/setSystemSettings"
-        params = {"category": "other", "settings": {"hdmiPcMode": hdmiPcMode }}
+
+        params = {"category": "other", "settings": {"hdmiPcMode": {hdmi_input: pc_mode} }}
 
         return await self.luna_request(uri, params)
 
