@@ -1,6 +1,5 @@
 import asyncio
 import base64
-import copy
 import functools
 import json
 import logging
@@ -1432,6 +1431,23 @@ class WebOsClient:
             "category": f"picture${tv_input}.{pic_mode}.{stereoscopic}.x",
             "settings": settings,
         }
+
+        return await self.luna_request(uri, params)
+
+    async def set_configs(self, settings):
+        """Set config settings.
+
+        Example:
+
+        "com.palm.app.settings.foobar": False,
+        "tv.model.motionProMode": "OLED Motion",
+        "tv.model.motionProMode": "OLED Motion Pro"
+
+        """
+
+        uri = "com.webos.service.config/setConfigs"
+
+        params = {"configs": settings}
 
         return await self.luna_request(uri, params)
 
