@@ -1435,6 +1435,23 @@ class WebOsClient:
 
         return await self.luna_request(uri, params)
 
+    async def set_configs(self, settings):
+        """Set config settings.
+
+        Example:
+
+        "com.palm.app.settings.foobar": False,
+        "tv.model.motionProMode": "OLED Motion",
+        "tv.model.motionProMode": "OLED Motion Pro"
+
+        """
+
+        uri = "com.webos.service.config/setConfigs"
+
+        params = {"configs": settings}
+
+        return await self.luna_request(uri, params)
+
     def validateCalibrationData(self, data, shape, dtype):
         if not isinstance(data, np.ndarray):
             raise TypeError(f"data must be of type ndarray but is instead {type(data)}")
