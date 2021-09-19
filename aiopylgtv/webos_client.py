@@ -1435,6 +1435,35 @@ class WebOsClient:
 
         return await self.luna_request(uri, params)
 
+    async def set_other_settings(self, settings):
+        """Set other settings.
+
+        A possible list of settings and example values are below (not all settings are applicable
+        for all modes and/or tv models):
+
+        "gameOptimizationHDMI1": False,
+        "gameOptimizationHDMI2": False,
+        "gameOptimizationHDMI3": False,
+        "gameOptimizationHDMI4": False,
+        "hdmiPcMode": {
+            "hdmi1": False,
+            "hdmi2": False,
+            "hdmi3": False,
+            "hdmi4": False
+        },
+        "uhdDeepColorHDMI1": False,
+        "uhdDeepColorHDMI2": False,
+        "uhdDeepColorHDMI3": False,
+        "uhdDeepColorHDMI4": False
+
+        """
+
+        uri = "com.webos.settingsservice/setSystemSettings"
+
+        params = {"category": "other", "settings": settings}
+
+        return await self.luna_request(uri, params)
+
     def validateCalibrationData(self, data, shape, dtype):
         if not isinstance(data, np.ndarray):
             raise TypeError(f"data must be of type ndarray but is instead {type(data)}")
