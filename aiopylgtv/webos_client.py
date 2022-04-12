@@ -496,7 +496,10 @@ class WebOsClient:
         model_name = self._system_info["modelName"]
         if model_name.startswith("OLED") and len(model_name) > 7:
             model = model_name[6]
-            year = int(model_name[7])
+            year = 10 if model_name[7] == 'X' else int(model_name[7])
+            if year < 6:
+                # 2021 is encoded as 1, later years will probably keep this pattern
+                year += 10
             if year >= 8:
                 info["lut1d"] = True
                 if model == "B":
@@ -505,7 +508,7 @@ class WebOsClient:
                     info["lut3d_size"] = 33
             if year == 8:
                 info["dv_config_type"] = 2018
-            elif year == 9:
+            elif year >= 9:
                 info["custom_tone_mapping"] = True
                 info["dv_config_type"] = 2019
         elif len(model_name) > 5:
